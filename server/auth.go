@@ -93,6 +93,7 @@ func (c *Conn) compareNativePasswordAuthData(clientAuthData []byte, credential C
 			continue
 		}
 		if mysql.CompareNativePassword(clientAuthData, decoded, c.salt) {
+			c.authPassword = password
 			return nil
 		}
 	}
@@ -137,6 +138,7 @@ func (c *Conn) compareSha256PasswordAuthData(clientAuthData []byte, credential C
 			continue
 		}
 		if check {
+			c.authPassword = password
 			return nil
 		}
 	}

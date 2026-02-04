@@ -85,6 +85,7 @@ func (c *Conn) checkSha2CacheCredentials(clientAuthData []byte, credential Crede
 		}
 		match, err := auth.CheckHashingPassword([]byte(hash), string(clientAuthData), mysql.AUTH_CACHING_SHA2_PASSWORD)
 		if match && err == nil {
+			c.authPassword = password
 			return nil
 		}
 	}

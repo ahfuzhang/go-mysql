@@ -28,6 +28,7 @@ type Conn struct {
 	user                string
 	credential          Credential
 	cachingSha2FullAuth bool
+	authPassword        string
 
 	h Handler
 
@@ -129,7 +130,14 @@ func (c *Conn) handshake() error {
 }
 
 func (c *Conn) Close() {
-	c.closed.Store(true)
+	if c.closed.Swap(true) {
+		return
+	}
+	if c.h != nil {
+		if closer, ok := c.h.(interface{ Close() error }); ok {
+			_ = closer.Close()
+		}
+	}
 	c.Conn.Close()
 }
 
@@ -139,6 +147,12 @@ func (c *Conn) Closed() bool {
 
 func (c *Conn) GetUser() string {
 	return c.user
+}
+
+// AuthPassword returns the matched plaintext password after authentication.
+// It will be empty if authentication did not complete or password could not be determined.
+func (c *Conn) AuthPassword() string {
+	return c.authPassword
 }
 
 func (c *Conn) Capability() uint32 {
